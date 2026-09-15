@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>AI Student Study Assistant</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <!-- HEADER -->
+
+    <header>
+
+        <h1>🎓 AI Student Study Assistant</h1>
+
+        <p class="subtitle">
+            Your Personal AI Study Partner
+        </p>
+
+    </header>
+
+
+
+    <!-- FEATURE CARDS -->
+
+    <div class="cards">
+
+
+        <!-- ASK AI -->
+
+        <div class="card">
+
+            <h2>🤖 Ask AI</h2>
+
+            <p>
+                Ask any question and get an easy explanation.
+            </p>
+
+
+            <form action="/ask"
+                  method="POST"
+                  onsubmit="saveFeatureState('ask')">
+
+                <textarea
+                    name="question"
+                    placeholder="Type your question..."
+                    required>{{ answer_question if answer_question else '' }}</textarea>
+
+
+                <button type="submit">
+                    Ask AI
+                </button>
+
+            </form>
+
+
+            {% if answer %}
+
+            <div class="answer"
+                 id="ask-answer">
+
+                <h3>💡 Answer</h3>
+
+                <p class="notes-text">
+                    {{ answer }}
+                </p>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+
+
+        <!-- NOTES -->
+
+        <div class="card">
+
+            <h2>📝 Generate Notes</h2>
+
+            <p>
+                Enter a topic and get easy study notes.
+            </p>
+
+
+            <form action="/notes"
+                  method="POST"
+                  onsubmit="saveFeatureState('notes')">
+
+                <input
+                    type="text"
+                    name="topic"
+                    placeholder="Enter topic, e.g. DBMS"
+                    value="{{ notes_topic if notes_topic else '' }}"
+                    required>
+
+
+                <button type="submit">
+                    Generate Notes
+                </button>
+
+            </form>
+
+
+            {% if notes %}
+
+            <div class="answer"
+                 id="notes-answer">
+
+                <h3>📚 Your Notes</h3>
+
+                <p class="notes-text">
+                    {{ notes }}
+                </p>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+
+
+        <!-- STUDY PLANNER -->
+
+        <div class="card">
+
+            <h2>📅 Study Planner</h2>
+
+            <p>
+                Create a personalized study schedule.
+            </p>
+
+
+            <form action="/planner"
+                  method="POST"
+                  onsubmit="saveFeatureState('planner')">
+
+
+                <input
+                    type="text"
+                    name="subject"
+                    placeholder="Enter subject"
+                    value="{{ plan_subject if plan_subject else '' }}"
+                    required>
+
+
+                <input
+                    type="number"
+                    name="hours"
+                    placeholder="Daily study hours"
+                    min="1"
+                    max="12"
+                    required>
+
+
+                <button type="submit">
+                    Create Study Plan
+                </button>
+
+            </form>
+
+
+            {% if plan %}
+
+            <div class="answer"
+                 id="planner-answer">
+
+                <h3>📚 Your Study Plan</h3>
+
+                <p class="notes-text">
+                    {{ plan }}
+                </p>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+
+
+        <!-- QUIZ -->
+
+        <div class="card">
+
+            <h2>🧠 Quiz Generator</h2>
+
+            <p>
+                Enter a topic and test your knowledge.
+            </p>
+
+
+            <form action="/quiz"
+                  method="POST"
+                  onsubmit="saveFeatureState('quiz')">
+
+
+                <input
+                    type="text"
+                    name="quiz_topic"
+                    placeholder="Enter topic, e.g. DBMS"
+                    required>
+
+
+                <button type="submit">
+                    Generate Quiz
+                </button>
+
+            </form>
+
+
+
+            {% if quiz %}
+
+            <div class="answer">
+
+                <h3>
+                    🧠 {{ quiz_topic.upper() }} Quiz
+                </h3>
+
+
+                <form action="/submit_quiz"
+                      method="POST">
+
+
+                    {% for q in quiz %}
+
+                    {% set question_index = loop.index0 %}
+
+
+                    <div class="quiz-question">
+
+                        <h3>
+                            Q{{ loop.index }}.
+                            {{ q.question }}
+                        </h3>
+
+
+                        {% for option in q.options %}
+
+
+                        <label class="quiz-option">
+
+                            <input
+                                type="radio"
+                                name="q{{ question_index }}"
+                                value="{{ option }}"
+                                required>
+
+                            <span>
+                                {{ option }}
+                            </span>
+
+                        </label>
+
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    {% endfor %}
+
+
+                    <input
+                        type="hidden"
+                        name="quiz_topic"
+                        value="{{ quiz_topic }}">
+
+
+                    <button type="submit">
+                        ✅ Submit Quiz
+                    </button>
+
+
+                </form>
+
+            </div>
+
+            {% endif %}
+
+
+
+            {% if result %}
+
+            <div class="answer">
+
+                <h3>
+                    🎯 Quiz Result
+                </h3>
+
+                <p class="notes-text">
+                    {{ result }}
+                </p>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- STUDY HISTORY -->
+
+    <div class="history-section">
+
+
+        <h2>
+            📊 Study History
+        </h2>
+
+
+        <p>
+            Your previous study activities are saved here.
+        </p>
+
+
+        {% if history %}
+
+
+        <div class="history-list">
+
+
+            {% for item in history %}
+
+
+            <div class="history-item">
+
+
+                <div class="history-info">
+
+
+                    <h3>
+
+                        {% if item[1] == "Ask AI" %}
+                            🤖
+                        {% elif item[1] == "Notes" %}
+                            📝
+                        {% elif item[1] == "Study Planner" %}
+                            📅
+                        {% elif item[1] == "Quiz" %}
+                            🧠
+                        {% endif %}
+
+                        {{ item[1] }}
+
+                    </h3>
+
+
+                    <strong>
+                        {{ item[2] }}
+                    </strong>
+
+
+                    <small>
+                        {{ item[4] }}
+                    </small>
+
+
+                </div>
+
+
+                <a
+                    href="/delete_history/{{ item[0] }}"
+                    class="delete-btn">
+
+                    🗑️ Delete
+
+                </a>
+
+
+            </div>
+
+
+            {% endfor %}
+
+
+        </div>
+
+
+        <a
+            href="/clear_history"
+            class="clear-btn">
+
+            🗑️ Clear All History
+
+        </a>
+
+
+        {% else %}
+
+
+        <div class="empty-history">
+
+            📚 No study history yet.
+
+            <br>
+
+            Start using the features above!
+
+        </div>
+
+
+        {% endif %}
+
+
+    </div>
+
+
+</div>
+
+
+<!-- =========================
+     JAVASCRIPT
+     ========================= -->
+
+<script>
+
+function saveFeatureState(feature) {
+
+    localStorage.setItem(
+        "lastFeature",
+        feature
+    );
+
+}
+
+
+window.addEventListener(
+    "beforeunload",
+    function () {
+
+        localStorage.setItem(
+            "studyAssistantVisited",
+            "true"
+        );
+
+    }
+);
+
+</script>
+
+
+</body>
+
+</html>
