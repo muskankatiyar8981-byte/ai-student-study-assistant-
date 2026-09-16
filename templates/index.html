@@ -8,10 +8,20 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>AI Student Study Assistant</title>
+    <title>StudyNova | AI Study Assistant</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
 
 </head>
 
@@ -19,321 +29,938 @@
 <body>
 
 
-<div class="container">
+<div class="app">
 
 
-    <!-- HEADER -->
+    <!-- ================= NAVBAR ================= -->
 
-    <header>
+    <nav class="navbar">
 
-        <h1>🎓 AI Student Study Assistant</h1>
+        <div class="brand">
 
-        <p class="subtitle">
-            Your Personal AI Study Partner
-        </p>
+            <div class="brand-icon">
+                ✦
+            </div>
 
-    </header>
+            <div class="brand-text">
 
+                <h2>StudyNova</h2>
 
-
-    <!-- FEATURE CARDS -->
-
-    <div class="cards">
-
-
-        <!-- ASK AI -->
-
-        <div class="card">
-
-            <h2>🤖 Ask AI</h2>
-
-            <p>
-                Ask any question and get an easy explanation.
-            </p>
-
-
-            <form action="/ask"
-                  method="POST"
-                  onsubmit="saveFeatureState('ask')">
-
-                <textarea
-                    name="question"
-                    placeholder="Type your question..."
-                    required>{{ answer_question if answer_question else '' }}</textarea>
-
-
-                <button type="submit">
-                    Ask AI
-                </button>
-
-            </form>
-
-
-            {% if answer %}
-
-            <div class="answer"
-                 id="ask-answer">
-
-                <h3>💡 Answer</h3>
-
-                <p class="notes-text">
-                    {{ answer }}
-                </p>
+                <span>AI Study Assistant</span>
 
             </div>
 
-            {% endif %}
+        </div>
+
+
+        <div class="nav-links">
+
+            <a href="#features">
+                Features
+            </a>
+
+            <a href="#how">
+                How It Works
+            </a>
+
+            <a href="#history">
+                History
+            </a>
+
+        </div>
+
+
+        <div class="nav-status">
+
+            <span class="status-dot"></span>
+
+            AI Online
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- ================= HERO ================= -->
+
+    <section class="hero">
+
+
+        <div class="hero-content">
+
+
+            <div class="badge">
+
+                ✨ AI-POWERED LEARNING
+
+            </div>
+
+
+            <h1>
+
+                Your ideas.
+
+                <span>
+                    Your learning.
+                </span>
+
+                Your Nova.
+
+            </h1>
+
+
+            <p>
+
+                Study smarter with your personal AI companion.
+                Generate notes, create quizzes, build study plans
+                and get simple explanations—all in one place.
+
+            </p>
+
+
+            <div class="hero-buttons">
+
+                <a href="#features"
+                   class="primary-btn">
+
+                    🚀 Start Learning
+
+                </a>
+
+
+                <a href="#history"
+                   class="secondary-btn">
+
+                    📊 My Activity
+
+                </a>
+
+            </div>
+
+
+            <div class="hero-trust">
+
+                <span>✓ Smart Learning</span>
+
+                <span>✓ Student Friendly</span>
+
+                <span>✓ AI Powered</span>
+
+            </div>
+
 
         </div>
 
 
 
-        <!-- NOTES -->
+        <!-- HERO VISUAL -->
 
-        <div class="card">
-
-            <h2>📝 Generate Notes</h2>
-
-            <p>
-                Enter a topic and get easy study notes.
-            </p>
+        <div class="hero-visual">
 
 
-            <form action="/notes"
-                  method="POST"
-                  onsubmit="saveFeatureState('notes')">
+            <div class="orbit orbit-one"></div>
 
-                <input
-                    type="text"
-                    name="topic"
-                    placeholder="Enter topic, e.g. DBMS"
-                    value="{{ notes_topic if notes_topic else '' }}"
-                    required>
+            <div class="orbit orbit-two"></div>
 
 
-                <button type="submit">
-                    Generate Notes
-                </button>
+            <div class="nova-circle">
 
-            </form>
+                <div class="nova-star">
+                    ✦
+                </div>
 
+                <span>
+                    STUDY
+                </span>
 
-            {% if notes %}
-
-            <div class="answer"
-                 id="notes-answer">
-
-                <h3>📚 Your Notes</h3>
-
-                <p class="notes-text">
-                    {{ notes }}
-                </p>
+                <strong>
+                    NOVA
+                </strong>
 
             </div>
 
-            {% endif %}
+
+            <div class="floating-card card-one">
+
+                <div class="floating-icon">
+                    📝
+                </div>
+
+                <div>
+
+                    <strong>
+                        Smart Notes
+                    </strong>
+
+                    <small>
+                        AI generated
+                    </small>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="floating-card card-two">
+
+                <div class="floating-icon">
+                    🎯
+                </div>
+
+                <div>
+
+                    <strong>
+                        Quiz Ready
+                    </strong>
+
+                    <small>
+                        Test your knowledge
+                    </small>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="floating-card card-three">
+
+                <div class="floating-icon">
+                    ⚡
+                </div>
+
+                <div>
+
+                    <strong>
+                        Study Faster
+                    </strong>
+
+                    <small>
+                        Learn smarter
+                    </small>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ================= QUICK STATS ================= -->
+
+    <section class="stats">
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon purple">
+                🤖
+            </div>
+
+            <div>
+
+                <span>
+                    AI Assistant
+                </span>
+
+                <strong>
+                    Active
+                </strong>
+
+            </div>
 
         </div>
 
 
 
-        <!-- STUDY PLANNER -->
+        <div class="stat-card">
 
-        <div class="card">
-
-            <h2>📅 Study Planner</h2>
-
-            <p>
-                Create a personalized study schedule.
-            </p>
-
-
-            <form action="/planner"
-                  method="POST"
-                  onsubmit="saveFeatureState('planner')">
-
-
-                <input
-                    type="text"
-                    name="subject"
-                    placeholder="Enter subject"
-                    value="{{ plan_subject if plan_subject else '' }}"
-                    required>
-
-
-                <input
-                    type="number"
-                    name="hours"
-                    placeholder="Daily study hours"
-                    min="1"
-                    max="12"
-                    required>
-
-
-                <button type="submit">
-                    Create Study Plan
-                </button>
-
-            </form>
-
-
-            {% if plan %}
-
-            <div class="answer"
-                 id="planner-answer">
-
-                <h3>📚 Your Study Plan</h3>
-
-                <p class="notes-text">
-                    {{ plan }}
-                </p>
-
+            <div class="stat-icon blue">
+                📝
             </div>
 
-            {% endif %}
+            <div>
+
+                <span>
+                    Smart Notes
+                </span>
+
+                <strong>
+                    Ready
+                </strong>
+
+            </div>
 
         </div>
 
 
 
-        <!-- QUIZ -->
+        <div class="stat-card">
 
-        <div class="card">
+            <div class="stat-icon green">
+                🧠
+            </div>
 
-            <h2>🧠 Quiz Generator</h2>
+            <div>
 
-            <p>
-                Enter a topic and test your knowledge.
-            </p>
+                <span>
+                    Quiz Mode
+                </span>
 
+                <strong>
+                    Ready
+                </strong>
 
-            <form action="/quiz"
-                  method="POST"
-                  onsubmit="saveFeatureState('quiz')">
+            </div>
 
-
-                <input
-                    type="text"
-                    name="quiz_topic"
-                    placeholder="Enter topic, e.g. DBMS"
-                    required>
-
-
-                <button type="submit">
-                    Generate Quiz
-                </button>
-
-            </form>
+        </div>
 
 
 
-            {% if quiz %}
+        <div class="stat-card">
 
-            <div class="answer">
+            <div class="stat-icon orange">
+                📅
+            </div>
+
+            <div>
+
+                <span>
+                    Study Planner
+                </span>
+
+                <strong>
+                    Ready
+                </strong>
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- ================= FEATURES ================= -->
+
+    <section id="features"
+             class="section">
+
+
+        <div class="section-heading">
+
+
+            <div>
+
+                <span class="section-label">
+                    YOUR AI TOOLKIT
+                </span>
+
+
+                <h2>
+                    Everything you need to study smarter.
+                </h2>
+
+
+                <p>
+
+                    Four simple tools to help you understand,
+                    practice and organize your learning.
+
+                </p>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="feature-grid">
+
+
+
+            <!-- ASK AI -->
+
+            <div class="feature-card ask-card">
+
+
+                <div class="feature-top">
+
+                    <div class="feature-icon">
+                        🤖
+                    </div>
+
+                    <span class="feature-tag">
+                        AI CHAT
+                    </span>
+
+                </div>
+
 
                 <h3>
-                    🧠 {{ quiz_topic.upper() }} Quiz
+                    Ask Nova
                 </h3>
 
 
-                <form action="/submit_quiz"
-                      method="POST">
+                <p>
+                    Ask any study question and get an
+                    easy-to-understand explanation.
+                </p>
 
 
-                    {% for q in quiz %}
-
-                    {% set question_index = loop.index0 %}
-
-
-                    <div class="quiz-question">
-
-                        <h3>
-                            Q{{ loop.index }}.
-                            {{ q.question }}
-                        </h3>
+                <form action="/ask"
+                      method="POST"
+                      onsubmit="saveFeatureState('ask')">
 
 
-                        {% for option in q.options %}
-
-
-                        <label class="quiz-option">
-
-                            <input
-                                type="radio"
-                                name="q{{ question_index }}"
-                                value="{{ option }}"
-                                required>
-
-                            <span>
-                                {{ option }}
-                            </span>
-
-                        </label>
-
-
-                        {% endfor %}
-
-                    </div>
-
-
-                    {% endfor %}
-
-
-                    <input
-                        type="hidden"
-                        name="quiz_topic"
-                        value="{{ quiz_topic }}">
+                    <textarea
+                        name="question"
+                        placeholder="What do you want to understand?"
+                        required>{{ answer_question if answer_question else '' }}</textarea>
 
 
                     <button type="submit">
-                        ✅ Submit Quiz
+
+                        Ask Nova
+
+                        <span>→</span>
+
                     </button>
 
 
                 </form>
 
+
+
+                {% if answer %}
+
+                <div class="result-box"
+                     id="ask-answer">
+
+
+                    <div class="result-title">
+                        💡 Nova's Answer
+                    </div>
+
+
+                    <p class="notes-text">
+                        {{ answer }}
+                    </p>
+
+
+                </div>
+
+                {% endif %}
+
+
             </div>
 
-            {% endif %}
 
 
+            <!-- NOTES -->
 
-            {% if result %}
+            <div class="feature-card notes-card">
 
-            <div class="answer">
+
+                <div class="feature-top">
+
+                    <div class="feature-icon">
+                        📝
+                    </div>
+
+                    <span class="feature-tag">
+                        SMART NOTES
+                    </span>
+
+                </div>
+
 
                 <h3>
-                    🎯 Quiz Result
+                    Nova Notes
                 </h3>
 
-                <p class="notes-text">
-                    {{ result }}
+
+                <p>
+                    Turn any topic into simple,
+                    exam-ready study notes.
                 </p>
+
+
+                <form action="/notes"
+                      method="POST"
+                      onsubmit="saveFeatureState('notes')">
+
+
+                    <input
+                        type="text"
+                        name="topic"
+                        placeholder="Enter topic e.g. DBMS"
+                        value="{{ notes_topic if notes_topic else '' }}"
+                        required>
+
+
+                    <button type="submit">
+
+                        Generate Notes
+
+                        <span>→</span>
+
+                    </button>
+
+
+                </form>
+
+
+
+                {% if notes %}
+
+                <div class="result-box"
+                     id="notes-answer">
+
+
+                    <div class="result-title">
+                        📚 Your Notes
+                    </div>
+
+
+                    <p class="notes-text">
+                        {{ notes }}
+                    </p>
+
+
+                </div>
+
+                {% endif %}
+
 
             </div>
 
-            {% endif %}
+
+
+            <!-- PLANNER -->
+
+            <div class="feature-card planner-card">
+
+
+                <div class="feature-top">
+
+                    <div class="feature-icon">
+                        📅
+                    </div>
+
+                    <span class="feature-tag">
+                        PRODUCTIVITY
+                    </span>
+
+                </div>
+
+
+                <h3>
+                    Study Planner
+                </h3>
+
+
+                <p>
+                    Build a personalized study schedule
+                    around your available time.
+                </p>
+
+
+                <form action="/planner"
+                      method="POST"
+                      onsubmit="saveFeatureState('planner')">
+
+
+                    <input
+                        type="text"
+                        name="subject"
+                        placeholder="Enter subject"
+                        value="{{ plan_subject if plan_subject else '' }}"
+                        required>
+
+
+                    <input
+                        type="number"
+                        name="hours"
+                        placeholder="Daily study hours"
+                        min="1"
+                        max="12"
+                        required>
+
+
+                    <button type="submit">
+
+                        Create Plan
+
+                        <span>→</span>
+
+                    </button>
+
+
+                </form>
+
+
+
+                {% if plan %}
+
+                <div class="result-box"
+                     id="planner-answer">
+
+
+                    <div class="result-title">
+                        📚 Your Study Plan
+                    </div>
+
+
+                    <p class="notes-text">
+                        {{ plan }}
+                    </p>
+
+
+                </div>
+
+                {% endif %}
+
+
+            </div>
+
+
+
+            <!-- QUIZ -->
+
+            <div class="feature-card quiz-card">
+
+
+                <div class="feature-top">
+
+                    <div class="feature-icon">
+                        🧠
+                    </div>
+
+                    <span class="feature-tag">
+                        TEST YOURSELF
+                    </span>
+
+                </div>
+
+
+                <h3>
+                    Quiz Nova
+                </h3>
+
+
+                <p>
+                    Generate questions and test your
+                    understanding of any topic.
+                </p>
+
+
+                <form action="/quiz"
+                      method="POST"
+                      onsubmit="saveFeatureState('quiz')">
+
+
+                    <input
+                        type="text"
+                        name="quiz_topic"
+                        placeholder="Enter topic e.g. Python"
+                        required>
+
+
+                    <button type="submit">
+
+                        Generate Quiz
+
+                        <span>→</span>
+
+                    </button>
+
+
+                </form>
+
+
+
+                {% if quiz %}
+
+
+                <div class="result-box">
+
+
+                    <div class="result-title">
+
+                        🧠 {{ quiz_topic.upper() }} Quiz
+
+                    </div>
+
+
+                    <form action="/submit_quiz"
+                          method="POST">
+
+
+                        {% for q in quiz %}
+
+                        {% set question_index = loop.index0 %}
+
+
+                        <div class="quiz-question">
+
+
+                            <h4>
+
+                                Q{{ loop.index }}.
+                                {{ q.question }}
+
+                            </h4>
+
+
+                            {% for option in q.options %}
+
+
+                            <label class="quiz-option">
+
+
+                                <input
+                                    type="radio"
+                                    name="q{{ question_index }}"
+                                    value="{{ option }}"
+                                    required>
+
+
+                                <span>
+                                    {{ option }}
+                                </span>
+
+
+                            </label>
+
+
+                            {% endfor %}
+
+
+                        </div>
+
+
+                        {% endfor %}
+
+
+                        <input
+                            type="hidden"
+                            name="quiz_topic"
+                            value="{{ quiz_topic }}">
+
+
+                        <button type="submit">
+
+                            ✅ Submit Quiz
+
+                        </button>
+
+
+                    </form>
+
+
+                </div>
+
+
+                {% endif %}
+
+
+
+                {% if result %}
+
+
+                <div class="result-box">
+
+
+                    <div class="result-title">
+                        🎯 Quiz Result
+                    </div>
+
+
+                    <p class="notes-text">
+                        {{ result }}
+                    </p>
+
+
+                </div>
+
+
+                {% endif %}
+
+
+            </div>
+
 
         </div>
 
 
-    </div>
+    </section>
 
 
 
-    <!-- STUDY HISTORY -->
+    <!-- ================= HOW IT WORKS ================= -->
 
-    <div class="history-section">
-
-
-        <h2>
-            📊 Study History
-        </h2>
+    <section id="how"
+             class="how-section">
 
 
-        <p>
-            Your previous study activities are saved here.
-        </p>
+        <div class="section-heading center">
+
+
+            <span class="section-label">
+                SIMPLE. SMART. EFFECTIVE.
+            </span>
+
+
+            <h2>
+                How StudyNova works
+            </h2>
+
+
+            <p>
+                From question to understanding in three simple steps.
+            </p>
+
+
+        </div>
+
+
+
+        <div class="steps">
+
+
+            <div class="step">
+
+
+                <div class="step-number">
+                    01
+                </div>
+
+
+                <h3>
+                    Choose
+                </h3>
+
+
+                <p>
+                    Pick the learning tool you need.
+                </p>
+
+
+            </div>
+
+
+
+            <div class="step-line"></div>
+
+
+
+            <div class="step">
+
+
+                <div class="step-number">
+                    02
+                </div>
+
+
+                <h3>
+                    Ask
+                </h3>
+
+
+                <p>
+                    Enter your topic or question.
+                </p>
+
+
+            </div>
+
+
+
+            <div class="step-line"></div>
+
+
+
+            <div class="step">
+
+
+                <div class="step-number">
+                    03
+                </div>
+
+
+                <h3>
+                    Learn
+                </h3>
+
+
+                <p>
+                    Get your AI-powered result.
+                </p>
+
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- ================= HISTORY ================= -->
+
+    <section id="history"
+             class="history-section">
+
+
+        <div class="history-header">
+
+
+            <div>
+
+                <span class="section-label">
+                    YOUR LEARNING JOURNEY
+                </span>
+
+
+                <h2>
+                    Study History
+                </h2>
+
+
+                <p>
+                    Your previous activities are saved here.
+                </p>
+
+            </div>
+
+
+
+            {% if history %}
+
+
+            <a href="/clear_history"
+               class="clear-btn">
+
+                🗑️ Clear All
+
+            </a>
+
+
+            {% endif %}
+
+
+        </div>
+
 
 
         {% if history %}
@@ -348,24 +975,29 @@
             <div class="history-item">
 
 
+                <div class="history-icon">
+
+
+                    {% if item[1] == "Ask AI" %}
+                        🤖
+                    {% elif item[1] == "Notes" %}
+                        📝
+                    {% elif item[1] == "Study Planner" %}
+                        📅
+                    {% elif item[1] == "Quiz" %}
+                        🧠
+                    {% endif %}
+
+
+                </div>
+
+
                 <div class="history-info">
 
 
-                    <h3>
-
-                        {% if item[1] == "Ask AI" %}
-                            🤖
-                        {% elif item[1] == "Notes" %}
-                            📝
-                        {% elif item[1] == "Study Planner" %}
-                            📅
-                        {% elif item[1] == "Quiz" %}
-                            🧠
-                        {% endif %}
-
+                    <span>
                         {{ item[1] }}
-
-                    </h3>
+                    </span>
 
 
                     <strong>
@@ -385,7 +1017,7 @@
                     href="/delete_history/{{ item[0] }}"
                     class="delete-btn">
 
-                    🗑️ Delete
+                    Delete
 
                 </a>
 
@@ -399,25 +1031,27 @@
         </div>
 
 
-        <a
-            href="/clear_history"
-            class="clear-btn">
-
-            🗑️ Clear All History
-
-        </a>
-
-
         {% else %}
 
 
         <div class="empty-history">
 
-            📚 No study history yet.
 
-            <br>
+            <div class="empty-icon">
+                📚
+            </div>
 
-            Start using the features above!
+
+            <h3>
+                No study activity yet
+            </h3>
+
+
+            <p>
+                Start using StudyNova and your learning
+                journey will appear here.
+            </p>
+
 
         </div>
 
@@ -425,17 +1059,49 @@
         {% endif %}
 
 
-    </div>
+    </section>
+
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer>
+
+
+        <div class="footer-brand">
+
+            <div class="footer-logo">
+                ✦
+            </div>
+
+            <strong>
+                StudyNova
+            </strong>
+
+        </div>
+
+
+        <p>
+            Your AI-powered study companion.
+        </p>
+
+
+        <span>
+            AI Student Study Assistant • 2026
+        </span>
+
+
+    </footer>
 
 
 </div>
 
 
-<!-- =========================
-     JAVASCRIPT
-     ========================= -->
+
+<!-- ================= JAVASCRIPT ================= -->
 
 <script>
+
 
 function saveFeatureState(feature) {
 
@@ -458,6 +1124,7 @@ window.addEventListener(
 
     }
 );
+
 
 </script>
 
