@@ -1,28 +1,52 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
-from datetime import datetime
+import datetime
+import os
+import json
+import time
+
+from google import genai
+from google.genai import types
+
 
 app = Flask(__name__)
 
+# =========================================================
+# CONFIGURATION
+# =========================================================
+
+app.secret_key = os.environ.get(
+    "FLASK_SECRET_KEY",
+    "studynova-local-secret-key"
+)
+
 DATABASE = "study_assistant.db"
 
+MODEL_NAME = "gemini-3.5-flash-lite"
 
-# =========================
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
+
+
+# =========================================================
 # DATABASE
-# =========================
+# =========================================================
+
+def get_connection():
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    return conn
+
 
 def init_db():
 
-    conn = sqlite3.connect(DATABASE)
+    conn = get_connection()
 
-    cursor = conn.cursor()
-
-    cursor.execute("""
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS study_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             activity_type TEXT NOT NULL,
             topic TEXT NOT NULL,
-            content TEXT,
+            content TEXT NOT NULL,
             created_at TEXT NOT NULL
         )
     """)
@@ -31,22 +55,27 @@ def init_db():
     conn.close()
 
 
+# =========================================================
+# HISTORY
+# =========================================================
+
 def save_history(activity_type, topic, content):
 
-    conn = sqlite3.connect(DATABASE)
+    conn = get_connection()
 
-    cursor = conn.cursor()
-
-    cursor.execute("""
+    conn.execute(
+        """
         INSERT INTO study_history
         (activity_type, topic, content, created_at)
         VALUES (?, ?, ?, ?)
-    """, (
-        activity_type,
-        topic,
-        content,
-        datetime.now().strftime("%d-%m-%Y %I:%M %p")
-    ))
+        """,
+        (
+            activity_type,
+            topic,
+            content,
+            datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        )
+    )
 
     conn.commit()
     conn.close()
@@ -54,114 +83,156 @@ def save_history(activity_type, topic, content):
 
 def get_history():
 
-    conn = sqlite3.connect(DATABASE)
+    conn = get_connection()
 
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT id, activity_type, topic, content, created_at
+    rows = conn.execute(
+        """
+        SELECT *
         FROM study_history
         ORDER BY id DESC
-    """)
-
-    history = cursor.fetchall()
+        """
+    ).fetchall()
 
     conn.close()
 
-    return history
+    return rows
 
 
-# =========================
+def get_saved_notes():
+
+    conn = get_connection()
+
+    rows = conn.execute(
+        """
+        SELECT *
+        FROM study_history
+        WHERE activity_type = 'Notes'
+        ORDER BY id DESC
+        """
+    ).fetchall()
+
+    conn.close()
+
+    return rows
+
+
+def get_note_by_id(note_id):
+
+    conn = get_connection()
+
+    row = conn.execute(
+        """
+        SELECT *
+        FROM study_history
+        WHERE id = ?
+        AND activity_type = 'Notes'
+        """,
+        (note_id,)
+    ).fetchone()
+
+    conn.close()
+
+    return row
+
+
+# =========================================================
+# GEMINI
+# =========================================================
+
+def ask_gemini(prompt):
+
+    if not GEMINI_API_KEY:
+        return (
+            "Gemini API key is not configured. "
+            "Please add GEMINI_API_KEY in your environment variables."
+        )
+
+    try:
+
+        client = genai.Client(
+            api_key=GEMINI_API_KEY
+        )
+
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.3,
+                max_output_tokens=2200
+            )
+        )
+
+        if response and response.text:
+            return response.text.strip()
+
+        return "Sorry, Nova could not generate an answer."
+
+    except Exception as e:
+
+        print("Gemini Error:", e)
+
+        return (
+            "Sorry, Nova is temporarily unavailable. "
+            "Please try again in a moment."
+        )
+
+
+# =========================================================
 # HOME
-# =========================
+# =========================================================
 
 @app.route("/")
 def home():
 
     history = get_history()
+    saved_notes = get_saved_notes()
 
     return render_template(
         "index.html",
-        history=history
+        history=history,
+        saved_notes=saved_notes
     )
 
 
-# =========================
-# ASK AI
-# =========================
+# =========================================================
+# ASK NOVA
+# =========================================================
 
 @app.route("/ask", methods=["POST"])
 def ask():
 
     question = request.form.get("question", "").strip()
+    language = request.form.get("language", "English")
 
-    q = question.lower()
+    if not question:
 
-    if "dbms" in q:
+        return redirect(url_for("home"))
 
-        answer = """DBMS stands for Database Management System.
+    prompt = f"""
+You are StudyNova AI, an educational assistant for B.Tech Computer Science students.
 
-It is software used to store, manage and retrieve data from a database.
+Answer the student's question clearly and in an easy-to-understand way.
 
-Main features:
-• Data storage
-• Data security
-• Data retrieval
-• Data management
-• Backup and recovery
-
-Examples: MySQL, Oracle and PostgreSQL."""
-
-    elif "python" in q:
-
-        answer = """Python is a high-level programming language.
-
-It is easy to learn because its syntax is simple and readable.
-
-Python is commonly used for:
-• Web Development
-• Artificial Intelligence
-• Machine Learning
-• Data Analysis
-• Automation"""
-
-    elif "java" in q:
-
-        answer = """Java is a high-level, object-oriented programming language.
-
-Important concepts of Java include:
-• Class and Object
-• Inheritance
-• Polymorphism
-• Encapsulation
-• Abstraction
-
-Java is widely used for software and application development."""
-
-    elif "computer" in q:
-
-        answer = """A computer is an electronic device that accepts data as input,
-processes it and produces useful output.
-
-Basic working:
-
-Input → Processing → Output
-
-A computer can also store data for future use."""
-
-    else:
-
-        answer = f"""Here is an easy explanation of your question:
-
+Question:
 {question}
 
-Start by understanding the basic definition and main concept.
+Language:
+{language}
 
-Study Tips:
-• Learn the definition first.
-• Understand the concept with an example.
-• Write short notes.
-• Practice related questions."""
+Requirements:
+
+- Give a direct answer first.
+- Use clear headings.
+- Use short paragraphs.
+- Use bullet points when useful.
+- Give examples when helpful.
+- For programming questions, include simple code examples.
+- Keep the explanation useful for a college student.
+- Do not add unnecessary greetings.
+- Do not repeat the question unnecessarily.
+"""
+
+    answer = ask_gemini(prompt)
 
     save_history(
         "Ask AI",
@@ -169,678 +240,447 @@ Study Tips:
         answer
     )
 
-    history = get_history()
-
     return render_template(
-        "index.html",
-        answer=answer,
-        answer_question=question,
-        history=history
+        "result.html",
+        topic=question,
+        content=answer,
+        activity_type="Ask Nova"
     )
 
 
-# =========================
-# GENERATE NOTES
-# =========================
+# =========================================================
+# NOVA NOTES
+# =========================================================
 
 @app.route("/notes", methods=["POST"])
 def notes():
 
     topic = request.form.get("topic", "").strip()
+    language = request.form.get("language", "English")
 
-    t = topic.lower()
+    if not topic:
 
-    if "dbms" in t:
+        return redirect(url_for("home"))
 
-        notes = f"""
-📚 {topic.upper()} - Easy Study Notes
+    prompt = f"""
+Create clear study notes for a B.Tech Computer Science student.
 
-1. Definition
-DBMS stands for Database Management System.
-It is software used to store, manage and retrieve data.
+Topic:
+{topic}
 
-2. Features
-• Data security
-• Data storage
-• Data retrieval
-• Backup and recovery
-• Data consistency
+Language:
+{language}
 
-3. Advantages
-• Reduces data redundancy
-• Easy data access
-• Better security
-• Easy data management
+Create well-organized notes.
 
-4. Examples
-MySQL, Oracle, PostgreSQL
+Use this structure when appropriate:
 
-⭐ Exam Tip:
-Learn the definition, features, advantages and examples.
+# Topic Name
+
+## Definition
+
+## Key Points
+
+## Important Concepts
+
+## Example
+
+## Advantages / Features
+
+## Exam Points
+
+Requirements:
+
+- Keep paragraphs short.
+- Use bullet points.
+- Explain difficult concepts simply.
+- Include important keywords.
+- Make notes useful for revision.
+- Do not add unnecessary greetings.
 """
 
-    elif "python" in t:
-
-        notes = f"""
-🐍 {topic.upper()} - Easy Study Notes
-
-1. Definition
-Python is a high-level, interpreted programming language.
-
-2. Features
-• Simple syntax
-• Easy to learn
-• Open source
-• Portable
-• Large library support
-
-3. Applications
-• Web Development
-• AI and Machine Learning
-• Data Analysis
-• Automation
-
-⭐ Exam Tip:
-Remember Python's features and applications.
-"""
-
-    elif "java" in t:
-
-        notes = f"""
-☕ {topic.upper()} - Easy Study Notes
-
-1. Definition
-Java is a high-level, object-oriented programming language.
-
-2. Features
-• Object-oriented
-• Platform independent
-• Secure
-• Robust
-• Portable
-
-3. OOP Concepts
-• Encapsulation
-• Inheritance
-• Polymorphism
-• Abstraction
-
-⭐ Exam Tip:
-Prepare the four pillars of OOP.
-"""
-
-    elif "operating system" in t or t == "os":
-
-        notes = f"""
-💻 {topic.upper()} - Easy Study Notes
-
-1. Definition
-An Operating System is system software that manages
-computer hardware and software resources.
-
-2. Main Functions
-• Process Management
-• Memory Management
-• File Management
-• Device Management
-• Security
-
-3. Examples
-Windows, Linux, macOS, Android
-
-⭐ Exam Tip:
-Learn the definition and major functions of an Operating System.
-"""
-
-    else:
-
-        notes = f"""
-📖 {topic.upper()} - Easy Study Notes
-
-1. Introduction
-{topic} is an important topic in computer science.
-
-2. Basic Concept
-First understand the definition and basic working of {topic}.
-
-3. Key Points
-• Learn the basic definition.
-• Understand important concepts.
-• Study examples.
-• Remember important applications.
-
-4. Exam Preparation
-• Learn important definitions.
-• Make short notes.
-• Practice questions.
-• Revise regularly.
-
-⭐ Study Tip:
-Understand the concept first and then memorize important points.
-"""
+    notes_content = ask_gemini(prompt)
 
     save_history(
         "Notes",
         topic,
-        notes
+        notes_content
     )
-
-    history = get_history()
 
     return render_template(
-        "index.html",
-        notes=notes,
-        notes_topic=topic,
-        history=history
+        "result.html",
+        topic=topic,
+        content=notes_content,
+        activity_type="Nova Notes",
+        saved=True
     )
 
 
-# =========================
+# =========================================================
 # STUDY PLANNER
-# =========================
+# =========================================================
 
 @app.route("/planner", methods=["POST"])
 def planner():
 
     subject = request.form.get("subject", "").strip()
+    hours = request.form.get("hours", "2").strip()
+    language = request.form.get("language", "English")
 
-    hours = request.form.get("hours", "").strip()
+    if not subject:
 
-    try:
-        hours = int(hours)
-    except ValueError:
-        hours = 2
+        return redirect(url_for("home"))
 
-    if hours <= 2:
+    prompt = f"""
+Create a practical study plan for a B.Tech Computer Science student.
 
-        plan = f"""
-📅 STUDY PLAN
+Subject:
+{subject}
 
-Subject: {subject}
-Daily Study Time: {hours} hour(s)
+Available study time:
+{hours} hours
 
-⏰ Schedule
+Language:
+{language}
 
-1️⃣ Concept Learning — 45 minutes
-Study the basic concepts of {subject}.
+Create a simple plan with:
 
-2️⃣ Short Break — 10 minutes
+# Study Plan
 
-3️⃣ Practice — 45 minutes
-Solve questions and examples related to {subject}.
+## Session 1
 
-4️⃣ Revision — 20 minutes
-Revise everything studied today.
+## Session 2
 
-🎯 Daily Goal:
-Understand → Practice → Revise
+## Revision
 
-💡 Tip:
-Study consistently every day.
+## Practice
+
+## Quick Tips
+
+Requirements:
+
+- Divide the available time realistically.
+- Use short focused sessions.
+- Include revision.
+- Include practice/questions.
+- Keep the plan easy to follow.
+- Do not add unnecessary greetings.
 """
 
-    elif hours <= 4:
-
-        plan = f"""
-📅 STUDY PLAN
-
-Subject: {subject}
-Daily Study Time: {hours} hours
-
-⏰ Schedule
-
-1️⃣ Concept Learning — 1 hour
-Learn the main concepts of {subject}.
-
-2️⃣ Break — 15 minutes
-
-3️⃣ Practice — 1 hour
-Solve questions and examples.
-
-4️⃣ Break — 15 minutes
-
-5️⃣ Revision — 45 minutes
-Revise today's topics.
-
-6️⃣ Quick Test — 30 minutes
-Test yourself without looking at your notes.
-
-🎯 Daily Goal:
-Learn → Practice → Revise → Test
-"""
-
-    else:
-
-        plan = f"""
-📅 STUDY PLAN
-
-Subject: {subject}
-Daily Study Time: {hours} hours
-
-⏰ Schedule
-
-1️⃣ Concept Learning — 2 hours
-Study the important concepts of {subject}.
-
-2️⃣ Break — 20 minutes
-
-3️⃣ Practice — 1.5 hours
-Solve problems and previous questions.
-
-4️⃣ Break — 20 minutes
-
-5️⃣ Revision — 1 hour
-Revise the topics studied today.
-
-6️⃣ Self Test — 30 minutes
-Solve questions without using notes.
-
-🎯 Daily Goal:
-Complete concepts → Practice → Revise → Test
-
-💡 Tip:
-Take short breaks and keep your study sessions focused.
-"""
+    plan = ask_gemini(prompt)
 
     save_history(
-        "Study Planner",
+        "Planner",
         subject,
         plan
     )
 
-    history = get_history()
-
     return render_template(
-        "index.html",
-        plan=plan,
-        plan_subject=subject,
-        history=history
+        "result.html",
+        topic=subject,
+        content=plan,
+        activity_type="Study Planner"
     )
 
 
-# =========================
-# QUIZ GENERATOR
-# =========================
+# =========================================================
+# QUIZ
+# =========================================================
 
 @app.route("/quiz", methods=["POST"])
 def quiz():
 
-    topic = request.form.get("quiz_topic", "").strip()
+    note_id = request.form.get("note_id")
+    language = request.form.get("language", "English")
 
-    t = topic.lower()
+    if not note_id:
 
-    if "dbms" in t:
+        return redirect(url_for("home"))
 
-        questions = [
+    note = get_note_by_id(note_id)
 
-            {
-                "question": "What does DBMS stand for?",
-                "options": [
-                    "Data Backup Management System",
-                    "Database Management System",
-                    "Database Memory System",
-                    "Data Management Software"
-                ],
-                "answer": "Database Management System"
-            },
+    if not note:
 
-            {
-                "question": "Which is an example of DBMS?",
-                "options": [
-                    "MySQL",
-                    "HTML",
-                    "CSS",
-                    "Python"
-                ],
-                "answer": "MySQL"
-            },
+        return redirect(url_for("home"))
 
-            {
-                "question": "Which language is commonly used to query databases?",
-                "options": [
-                    "HTML",
-                    "SQL",
-                    "CSS",
-                    "Python"
-                ],
-                "answer": "SQL"
-            },
+    prompt = f"""
+Create exactly 10 multiple-choice questions from ONLY the study notes below.
 
-            {
-                "question": "Which key uniquely identifies a record?",
-                "options": [
-                    "Foreign Key",
-                    "Primary Key",
-                    "Alternate Key",
-                    "Secondary Key"
-                ],
-                "answer": "Primary Key"
-            },
+Do not use outside information.
 
-            {
-                "question": "DBMS helps to reduce:",
-                "options": [
-                    "Data redundancy",
-                    "Computer speed",
-                    "Internet usage",
-                    "Screen size"
-                ],
-                "answer": "Data redundancy"
-            }
+Language:
+{language}
 
-        ]
+Return ONLY valid JSON.
 
-    elif "python" in t:
+Required JSON format:
 
-        questions = [
+[
+  {{
+    "question": "Question text",
+    "options": [
+      "Option A",
+      "Option B",
+      "Option C",
+      "Option D"
+    ],
+    "answer": "Correct option"
+  }}
+]
 
-            {
-                "question": "Python is a:",
-                "options": [
-                    "High-level programming language",
-                    "Database",
-                    "Operating System",
-                    "Web browser"
-                ],
-                "answer": "High-level programming language"
-            },
+Rules:
 
-            {
-                "question": "Which symbol is used for comments in Python?",
-                "options": [
-                    "//",
-                    "#",
-                    "<!-- -->",
-                    "**"
-                ],
-                "answer": "#"
-            },
+- Exactly 10 questions.
+- Every question must have exactly 4 options.
+- Only one option must be correct.
+- The answer must exactly match one of the four options.
+- Questions must be based ONLY on the provided notes.
+- Do not include markdown.
+- Do not include ```json.
+- Do not include any explanation outside JSON.
 
-            {
-                "question": "Which function is used to display output?",
-                "options": [
-                    "display()",
-                    "print()",
-                    "output()",
-                    "show()"
-                ],
-                "answer": "print()"
-            },
+STUDY NOTES:
 
-            {
-                "question": "Which data type stores True or False?",
-                "options": [
-                    "int",
-                    "string",
-                    "boolean",
-                    "float"
-                ],
-                "answer": "boolean"
-            },
+{note["content"]}
+"""
 
-            {
-                "question": "Python is widely used in:",
-                "options": [
-                    "AI",
-                    "Data Analysis",
-                    "Web Development",
-                    "All of these"
-                ],
-                "answer": "All of these"
-            }
+    quiz_response = ask_gemini(prompt)
 
-        ]
+    try:
 
-    elif "java" in t:
+        cleaned = quiz_response.strip()
 
-        questions = [
+        if cleaned.startswith("```"):
+            cleaned = cleaned.replace("```json", "")
+            cleaned = cleaned.replace("```", "")
+            cleaned = cleaned.strip()
 
-            {
-                "question": "Java is mainly a:",
-                "options": [
-                    "Object-oriented programming language",
-                    "Database",
-                    "Operating System",
-                    "Browser"
-                ],
-                "answer": "Object-oriented programming language"
-            },
+        questions = json.loads(cleaned)
 
-            {
-                "question": "Which is a pillar of OOP?",
-                "options": [
-                    "Encapsulation",
-                    "Compilation",
-                    "Execution",
-                    "Debugging"
-                ],
-                "answer": "Encapsulation"
-            },
+        if not isinstance(questions, list):
+            raise ValueError("Quiz is not a list.")
 
-            {
-                "question": "Which keyword is used to create a class?",
-                "options": [
-                    "object",
-                    "class",
-                    "create",
-                    "newclass"
-                ],
-                "answer": "class"
-            },
+        if len(questions) != 10:
+            raise ValueError("Quiz does not contain exactly 10 questions.")
 
-            {
-                "question": "Java is:",
-                "options": [
-                    "Platform dependent",
-                    "Platform independent",
-                    "Hardware dependent",
-                    "Browser dependent"
-                ],
-                "answer": "Platform independent"
-            },
+        for q in questions:
 
-            {
-                "question": "Which concept allows one class to acquire properties of another?",
-                "options": [
-                    "Encapsulation",
-                    "Inheritance",
-                    "Abstraction",
-                    "Compilation"
-                ],
-                "answer": "Inheritance"
-            }
+            if "question" not in q:
+                raise ValueError("Missing question.")
 
-        ]
+            if "options" not in q:
+                raise ValueError("Missing options.")
 
-    else:
+            if "answer" not in q:
+                raise ValueError("Missing answer.")
 
-        questions = [
+            if len(q["options"]) != 4:
+                raise ValueError("Question must have 4 options.")
 
-            {
-                "question": f"What is the basic definition of {topic}?",
-                "options": [
-                    "A computer science concept",
-                    "A type of hardware",
-                    "A web browser",
-                    "None of these"
-                ],
-                "answer": "A computer science concept"
-            },
+            if q["answer"] not in q["options"]:
+                raise ValueError("Correct answer not found in options.")
 
-            {
-                "question": f"Why is {topic} important?",
-                "options": [
-                    "For learning concepts",
-                    "For understanding technology",
-                    "For practical applications",
-                    "All of these"
-                ],
-                "answer": "All of these"
-            }
+    except Exception as e:
 
-        ]
+        print("Quiz JSON Error:", e)
+        print("Gemini Quiz Response:", quiz_response)
+
+        return render_template(
+            "result.html",
+            topic=note["topic"],
+            content=(
+                "Nova could not create the quiz correctly this time. "
+                "Please try again."
+            ),
+            activity_type="Quiz"
+        )
+
+    session["quiz_questions"] = questions
+    session["quiz_topic"] = note["topic"]
 
     return render_template(
-        "index.html",
-        quiz=questions,
-        quiz_topic=topic,
-        history=get_history()
+        "quiz.html",
+        questions=questions,
+        topic=note["topic"]
     )
 
 
-# =========================
+# =========================================================
 # SUBMIT QUIZ
-# =========================
+# =========================================================
 
 @app.route("/submit_quiz", methods=["POST"])
 def submit_quiz():
 
-    topic = request.form.get("quiz_topic", "").strip()
+    questions = session.get("quiz_questions", [])
+    topic = session.get("quiz_topic", "Quiz")
 
-    t = topic.lower()
+    if not questions:
 
-    if "dbms" in t:
-
-        answers = [
-            "Database Management System",
-            "MySQL",
-            "SQL",
-            "Primary Key",
-            "Data redundancy"
-        ]
-
-    elif "python" in t:
-
-        answers = [
-            "High-level programming language",
-            "#",
-            "print()",
-            "boolean",
-            "All of these"
-        ]
-
-    elif "java" in t:
-
-        answers = [
-            "Object-oriented programming language",
-            "Encapsulation",
-            "class",
-            "Platform independent",
-            "Inheritance"
-        ]
-
-    else:
-
-        answers = [
-            "A computer science concept",
-            "All of these"
-        ]
+        return redirect(url_for("home"))
 
     score = 0
+    results = []
 
-    for i, correct_answer in enumerate(answers):
+    for index, question in enumerate(questions):
 
-        user_answer = request.form.get(f"q{i}")
+        user_answer = request.form.get(
+            f"q{index}",
+            ""
+        )
 
-        if user_answer == correct_answer:
+        correct_answer = question["answer"]
+
+        is_correct = (
+            user_answer == correct_answer
+        )
+
+        if is_correct:
             score += 1
 
-    total = len(answers)
+        results.append({
+            "question": question["question"],
+            "user_answer": user_answer,
+            "correct_answer": correct_answer,
+            "is_correct": is_correct
+        })
 
-    percentage = int((score / total) * 100)
+    total = len(questions)
 
-    if percentage >= 80:
+    percentage = round(
+        (score / total) * 100
+    ) if total else 0
 
-        message = "🏆 Excellent! Keep it up!"
-
-    elif percentage >= 60:
-
-        message = "👏 Good job! A little more revision will help."
-
-    elif percentage >= 40:
-
-        message = "📚 Keep practicing. You can improve!"
-
-    else:
-
-        message = "💪 Don't worry. Revise the topic and try again!"
-
-    result = f"""
-🎯 QUIZ RESULT
-
-Subject: {topic}
-
-Score: {score} / {total}
-
-Percentage: {percentage}%
-
-{message}
-"""
+    quiz_summary = (
+        f"Quiz completed: {score}/{total} "
+        f"({percentage}%)"
+    )
 
     save_history(
         "Quiz",
         topic,
-        result
+        quiz_summary
     )
 
-    history = get_history()
+    session.pop("quiz_questions", None)
+    session.pop("quiz_topic", None)
 
     return render_template(
-        "index.html",
-        result=result,
-        result_topic=topic,
-        history=history
+        "quiz_result.html",
+        score=score,
+        total=total,
+        percentage=percentage,
+        results=results,
+        topic=topic
     )
 
 
-# =========================
-# DELETE HISTORY
-# =========================
+# =========================================================
+# DELETE ONE HISTORY ITEM
+# =========================================================
 
-@app.route("/delete_history/<int:history_id>")
+@app.route("/delete_history/<int:history_id>", methods=["POST"])
 def delete_history(history_id):
 
-    conn = sqlite3.connect(DATABASE)
+    try:
 
-    cursor = conn.cursor()
+        conn = get_connection()
 
-    cursor.execute(
-        "DELETE FROM study_history WHERE id = ?",
-        (history_id,)
-    )
+        conn.execute(
+            "DELETE FROM study_history WHERE id = ?",
+            (history_id,)
+        )
 
-    conn.commit()
-    conn.close()
+        conn.commit()
+        conn.close()
 
-    return redirect("/")
+    except Exception as e:
+
+        print("Delete history error:", e)
+
+    return redirect(url_for("home"))
 
 
-# =========================
-# CLEAR ALL HISTORY
-# =========================
+# =========================================================
+# DELETE ALL HISTORY
+# =========================================================
 
-@app.route("/clear_history")
+@app.route("/clear_history", methods=["POST"])
 def clear_history():
 
-    conn = sqlite3.connect(DATABASE)
+    try:
 
-    cursor = conn.cursor()
+        conn = get_connection()
 
-    cursor.execute("DELETE FROM study_history")
+        conn.execute(
+            "DELETE FROM study_history"
+        )
 
-    conn.commit()
-    conn.close()
+        conn.commit()
+        conn.close()
 
-    return redirect("/")
+        print("All history deleted successfully.")
+
+    except Exception as e:
+
+        print("Clear history error:", e)
+
+    return redirect(url_for("home"))
 
 
-# =========================
-# RUN APP
-# =========================
+# =========================================================
+# ERROR HANDLERS
+# =========================================================
+
+@app.errorhandler(404)
+def page_not_found(error):
+
+    return (
+        render_template(
+            "result.html",
+            topic="Page Not Found",
+            content="The page you are looking for does not exist.",
+            activity_type="Error"
+        ),
+        404
+    )
+
+
+@app.errorhandler(500)
+def internal_error(error):
+
+    return (
+        render_template(
+            "result.html",
+            topic="Something went wrong",
+            content=(
+                "StudyNova encountered a temporary error. "
+                "Please go back and try again."
+            ),
+            activity_type="Error"
+        ),
+        500
+    )
+
+
+# =========================================================
+# START APPLICATION
+# =========================================================
+
+init_db()
+
 
 if __name__ == "__main__":
 
-    init_db()
+    print()
+    print("======================================")
+    print("        💜 STUDYNOVA AI")
+    print("======================================")
+    print("Database ready.")
+    print("Starting StudyNova...")
+    print("Local URL: http://127.0.0.1:5001")
+    print("======================================")
+    print()
 
     app.run(
         debug=True,

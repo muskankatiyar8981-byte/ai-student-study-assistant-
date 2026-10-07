@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Quiz Nova - StudyNova</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Poppins", sans-serif;
+            background:
+                radial-gradient(circle at 5% 5%, #e9e5ff 0%, transparent 28%),
+                radial-gradient(circle at 95% 90%, #e7e7e7 0%, transparent 30%),
+                #f4f4f4;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        /* ================= NAVBAR ================= */
+
+        .navbar {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(12px);
+            padding: 17px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 3px 20px rgba(0,0,0,0.06);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            text-decoration: none;
+            font-size: 25px;
+            font-weight: 800;
+            color: #444;
+        }
+
+        .logo span {
+            color: #8175e5;
+        }
+
+        .ai-status {
+            background: #eeeeee;
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #69c867;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        /* ================= MAIN ================= */
+
+        .container {
+            width: 92%;
+            max-width: 900px;
+            margin: 40px auto 70px;
+        }
+
+        /* ================= BACK BUTTON ================= */
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            text-decoration: none;
+            background: white;
+            color: #555;
+            padding: 10px 17px;
+            border-radius: 13px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 5px 18px rgba(0,0,0,0.06);
+            transition: 0.2s;
+            margin-bottom: 24px;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            background: #eeeeee;
+        }
+
+        /* ================= HEADER ================= */
+
+        .quiz-header {
+            background: rgba(255,255,255,0.97);
+            border-radius: 28px;
+            padding: 34px 30px;
+            text-align: center;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.07);
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quiz-header::before {
+            content: "";
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            background: #eeeaff;
+            border-radius: 50%;
+            top: -100px;
+            left: -70px;
+        }
+
+        .quiz-header::after {
+            content: "";
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background: #f0f0f0;
+            border-radius: 50%;
+            bottom: -70px;
+            right: -35px;
+        }
+
+        .quiz-icon {
+            position: relative;
+            z-index: 2;
+            font-size: 45px;
+            margin-bottom: 8px;
+        }
+
+        .quiz-header h1 {
+            position: relative;
+            z-index: 2;
+            font-size: 31px;
+            color: #444;
+            margin-bottom: 7px;
+        }
+
+        .quiz-header p {
+            position: relative;
+            z-index: 2;
+            color: #777;
+            font-size: 14px;
+        }
+
+        .topic {
+            color: #7568dc;
+            font-weight: 700;
+        }
+
+        .question-count {
+            display: inline-block;
+            position: relative;
+            z-index: 2;
+            margin-top: 17px;
+            background: #eeeaff;
+            color: #665bc0;
+            padding: 8px 17px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* ================= PROGRESS ================= */
+
+        .progress-box {
+            background: white;
+            border-radius: 18px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+
+        .progress-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 9px;
+            font-size: 12px;
+            color: #777;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #eeeeee;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #9b91ee, #7064cf);
+            border-radius: 20px;
+        }
+
+        /* ================= QUESTION CARD ================= */
+
+        .question-card {
+            background: rgba(255,255,255,0.98);
+            border-radius: 23px;
+            padding: 27px;
+            margin-bottom: 18px;
+            box-shadow: 0 7px 25px rgba(0,0,0,0.06);
+            border: 1px solid rgba(255,255,255,0.8);
+            transition: 0.2s;
+        }
+
+        .question-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        .question-number {
+            display: inline-block;
+            background: #eeeaff;
+            color: #7568dc;
+            padding: 6px 13px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 13px;
+        }
+
+        .question-card h2 {
+            font-size: 18px;
+            line-height: 1.55;
+            color: #3f3f3f;
+            margin-bottom: 20px;
+        }
+
+        /* ================= OPTIONS ================= */
+
+        .options {
+            display: grid;
+            gap: 11px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f7f7f7;
+            border: 2px solid transparent;
+            padding: 14px 16px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .option-item:hover {
+            background: #eeeeee;
+            border-color: #d8d3ff;
+            transform: translateX(2px);
+        }
+
+        .option-item input {
+            width: 18px;
+            height: 18px;
+            accent-color: #8175e5;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .option-item:has(input:checked) {
+            background: #eeeaff;
+            border-color: #968ce9;
+            color: #554ba8;
+            font-weight: 600;
+        }
+
+        /* ================= SUBMIT ================= */
+
+        .submit-area {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .submit-btn {
+            border: none;
+            background: linear-gradient(
+                135deg,
+                #8175e5,
+                #6960c0
+            );
+            color: white;
+            padding: 15px 40px;
+            border-radius: 16px;
+            font-family: "Poppins", sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 9px 23px rgba(111,101,200,0.27);
+            transition: all 0.2s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 13px 28px rgba(111,101,200,0.34);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .footer-note {
+            text-align: center;
+            color: #888;
+            font-size: 12px;
+            margin-top: 13px;
+        }
+
+        /* ================= MOBILE ================= */
+
+        @media (max-width: 600px) {
+
+            .navbar {
+                padding: 15px 5%;
+            }
+
+            .logo {
+                font-size: 21px;
+            }
+
+            .ai-status {
+                font-size: 11px;
+                padding: 7px 10px;
+            }
+
+            .container {
+                width: 94%;
+                margin-top: 25px;
+            }
+
+            .quiz-header {
+                padding: 28px 18px;
+            }
+
+            .quiz-header h1 {
+                font-size: 25px;
+            }
+
+            .quiz-icon {
+                font-size: 38px;
+            }
+
+            .question-card {
+                padding: 20px 17px;
+            }
+
+            .question-card h2 {
+                font-size: 16px;
+            }
+
+            .option-item {
+                padding: 12px;
+                font-size: 13px;
+            }
+
+            .submit-btn {
+                width: 100%;
+            }
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+
+    <nav class="navbar">
+
+        <a href="/" class="logo">
+            Study<span>Nova</span>
+        </a>
+
+        <div class="ai-status">
+            <span class="dot"></span>
+            AI Online
+        </div>
+
+    </nav>
+
+
+    <!-- ================= MAIN ================= -->
+
+    <main class="container">
+
+        <!-- BACK -->
+
+        <a href="/" class="back-btn">
+            ← Back to StudyNova
+        </a>
+
+
+        <!-- HEADER -->
+
+        <section class="quiz-header">
+
+            <div class="quiz-icon">
+                🧠
+            </div>
+
+            <h1>
+                Quiz Nova
+            </h1>
+
+            <p>
+                Test your knowledge from your saved notes.
+            </p>
+
+            <div class="question-count">
+
+                10 Questions
+                •
+                Topic:
+                <span class="topic">
+                    {{ topic }}
+                </span>
+
+            </div>
+
+        </section>
+
+
+        <!-- PROGRESS -->
+
+        <div class="progress-box">
+
+            <div class="progress-top">
+
+                <span>
+                    Quiz Progress
+                </span>
+
+                <span>
+                    10 Questions
+                </span>
+
+            </div>
+
+            <div class="progress-bar">
+
+                <div class="progress-fill"></div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================= QUIZ FORM ================= -->
+
+        <form
+            action="/submit_quiz"
+            method="POST"
+        >
+
+            {% for q in questions %}
+
+            <section class="question-card">
+
+                <!-- QUESTION NUMBER -->
+
+                <div class="question-number">
+
+                    Question
+                    {{ loop.index }}
+                    /
+                    {{ questions|length }}
+
+                </div>
+
+
+                <!-- QUESTION -->
+
+                <h2>
+
+                    {{ q.question }}
+
+                </h2>
+
+
+                <!-- OPTIONS -->
+
+                <div class="options">
+
+                    {% set question_index = loop.index0 %}
+
+                    {% for option in q.options %}
+
+                    <label class="option-item">
+
+                        <input
+                            type="radio"
+                            name="q{{ question_index }}"
+                            value="{{ option }}"
+                            required
+                        >
+
+                        <span>
+                            {{ option }}
+                        </span>
+
+                    </label>
+
+                    {% endfor %}
+
+                </div>
+
+            </section>
+
+            {% endfor %}
+
+
+            <!-- ================= SUBMIT ================= -->
+
+            <div class="submit-area">
+
+                <button
+                    type="submit"
+                    class="submit-btn"
+                >
+
+                    🚀 Submit Quiz
+
+                </button>
+
+                <div class="footer-note">
+
+                    Choose the best answer for every question.
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </main>
+
+
+    <!-- ================= JS ================= -->
+
+    <script>
+
+        /*
+         * Small interaction:
+         * When an option is selected, scroll position
+         * remains normal and selected option gets highlighted
+         * through CSS.
+         */
+
+        document.querySelectorAll(
+            '.option-item input'
+        ).forEach(function(input) {
+
+            input.addEventListener(
+                'change',
+                function() {
+
+                    const card =
+                        this.closest('.question-card');
+
+                    if (card) {
+
+                        card.style.transform =
+                            'translateY(-2px)';
+
+                    }
+
+                }
+            );
+
+        });
+
+    </script>
+
+</body>
+</html>

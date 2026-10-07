@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Nova's Answer • StudyNova</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Poppins", sans-serif;
+            background:
+                radial-gradient(circle at 10% 10%, rgba(180, 160, 220, 0.22), transparent 28%),
+                radial-gradient(circle at 90% 20%, rgba(150, 150, 180, 0.20), transparent 28%),
+                linear-gradient(135deg, #eeeeF2, #dddde3);
+            color: #292632;
+            min-height: 100vh;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            width: 100%;
+            padding: 18px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255,255,255,0.7);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .brand {
+            font-size: 23px;
+            font-weight: 700;
+            color: #5b4a72;
+        }
+
+        .brand span {
+            color: #8d78aa;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #625b69;
+            font-weight: 500;
+        }
+
+        .online-dot {
+            width: 9px;
+            height: 9px;
+            background: #6d9b75;
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(109,155,117,0.6);
+        }
+
+        /* MAIN */
+        .container {
+            width: min(1000px, 92%);
+            margin: 45px auto 60px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #62586d;
+            background: rgba(255,255,255,0.75);
+            padding: 11px 18px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 7px 20px rgba(60,50,70,0.08);
+            transition: 0.25s;
+            margin-bottom: 28px;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            background: white;
+        }
+
+        /* HEADER */
+        .answer-header {
+            background: rgba(255,255,255,0.78);
+            backdrop-filter: blur(15px);
+            border-radius: 26px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(60,50,70,0.10);
+            border: 1px solid rgba(255,255,255,0.85);
+            margin-bottom: 22px;
+        }
+
+        .small-label {
+            color: #8b789c;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .answer-header h1 {
+            font-size: 30px;
+            color: #40364c;
+            margin-bottom: 10px;
+        }
+
+        .question {
+            background: #f3f1f6;
+            padding: 14px 17px;
+            border-radius: 14px;
+            color: #665c70;
+            font-size: 14px;
+            border-left: 4px solid #8d78aa;
+        }
+
+        /* ANSWER CARD */
+        .answer-card {
+            background: rgba(255,255,255,0.84);
+            backdrop-filter: blur(15px);
+            border-radius: 26px;
+            padding: 35px;
+            box-shadow: 0 15px 45px rgba(60,50,70,0.10);
+            border: 1px solid rgba(255,255,255,0.9);
+        }
+
+        .answer-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 21px;
+            font-weight: 700;
+            color: #4c4058;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e6e1ea;
+            margin-bottom: 25px;
+        }
+
+        .nova-icon {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ebe4f1;
+            border-radius: 13px;
+            font-size: 21px;
+        }
+
+        /* FORMATTED CONTENT */
+        .answer-content {
+            line-height: 1.85;
+            font-size: 15px;
+            color: #49434f;
+        }
+
+        .answer-content h2 {
+            font-size: 23px;
+            color: #51415f;
+            margin: 30px 0 13px;
+        }
+
+        .answer-content h3 {
+            font-size: 19px;
+            color: #5c4b68;
+            margin: 26px 0 11px;
+        }
+
+        .answer-content h4 {
+            font-size: 17px;
+            color: #655571;
+            margin: 22px 0 9px;
+        }
+
+        .answer-content p {
+            margin: 0 0 17px;
+        }
+
+        .answer-content ul,
+        .answer-content ol {
+            margin: 12px 0 20px 25px;
+        }
+
+        .answer-content li {
+            margin-bottom: 10px;
+            padding-left: 5px;
+        }
+
+        .answer-content strong {
+            color: #554365;
+            font-weight: 700;
+        }
+
+        .answer-content em {
+            color: #74667e;
+        }
+
+        /* CODE */
+        .answer-content pre {
+            background: #292731;
+            color: #f5f1f8;
+            padding: 20px;
+            border-radius: 16px;
+            overflow-x: auto;
+            margin: 18px 0 25px;
+            font-family: "SFMono-Regular", Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.65;
+            box-shadow: 0 10px 25px rgba(35,30,40,0.16);
+        }
+
+        .answer-content code {
+            font-family: "SFMono-Regular", Consolas, monospace;
+        }
+
+        .answer-content :not(pre) > code {
+            background: #eee8f2;
+            color: #654f76;
+            padding: 3px 7px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        /* HORIZONTAL LINE */
+        .answer-content hr {
+            border: none;
+            border-top: 1px solid #e6e1ea;
+            margin: 28px 0;
+        }
+
+        /* TABLE */
+        .answer-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #faf9fb;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .answer-content th,
+        .answer-content td {
+            padding: 12px 14px;
+            border: 1px solid #e4dfe8;
+            text-align: left;
+        }
+
+        .answer-content th {
+            background: #eee8f2;
+            color: #574666;
+        }
+
+        /* FOOTER BUTTON */
+        .bottom {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .home-btn {
+            display: inline-block;
+            text-decoration: none;
+            padding: 13px 25px;
+            border-radius: 15px;
+            background: #685678;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(75,60,90,0.18);
+            transition: 0.25s;
+        }
+
+        .home-btn:hover {
+            transform: translateY(-2px);
+            background: #594868;
+        }
+
+        footer {
+            text-align: center;
+            color: #77707e;
+            font-size: 13px;
+            padding: 20px;
+        }
+
+        /* MOBILE */
+        @media (max-width: 650px) {
+
+            .navbar {
+                padding: 15px 5%;
+            }
+
+            .brand {
+                font-size: 20px;
+            }
+
+            .container {
+                width: 94%;
+                margin-top: 28px;
+            }
+
+            .answer-header {
+                padding: 22px;
+            }
+
+            .answer-header h1 {
+                font-size: 25px;
+            }
+
+            .answer-card {
+                padding: 22px;
+            }
+
+            .answer-title {
+                font-size: 18px;
+            }
+
+            .answer-content {
+                font-size: 14px;
+            }
+
+            .answer-content h2 {
+                font-size: 20px;
+            }
+
+            .answer-content h3 {
+                font-size: 17px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="brand">
+            💜 Study<span>Nova</span>
+        </div>
+
+        <div class="status">
+            <span class="online-dot"></span>
+            AI Online
+        </div>
+    </nav>
+
+
+    <main class="container">
+
+        <!-- BACK -->
+        <a href="{{ url_for('home') }}" class="back-btn">
+            ← Back to StudyNova
+        </a>
+
+
+        <!-- QUESTION HEADER -->
+        <section class="answer-header">
+
+            <div class="small-label">
+                ✨ Ask Nova
+            </div>
+
+            <h1>Nova's Answer</h1>
+
+            <div class="question">
+                <strong>Your Question:</strong>
+                {{ topic }}
+            </div>
+
+        </section>
+
+
+        <!-- ANSWER -->
+        <section class="answer-card">
+
+            <div class="answer-title">
+                <div class="nova-icon">🤖</div>
+                <span>StudyNova AI Explanation</span>
+            </div>
+
+            <div class="answer-content" id="answerContent">
+                {{ content }}
+            </div>
+
+        </section>
+
+
+        <!-- HOME -->
+        <div class="bottom">
+            <a href="{{ url_for('home') }}" class="home-btn">
+                🏠 Back to StudyNova
+            </a>
+        </div>
+
+    </main>
+
+
+    <footer>
+        💜 StudyNova • Plan • Learn • Achieve
+    </footer>
+
+
+    <!-- FORMAT GEMINI MARKDOWN -->
+    <script>
+        function formatAnswer(text) {
+
+            if (!text) return "";
+
+            let html = text;
+
+            /* Escape HTML first */
+            html = html
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+
+            /* Code blocks */
+            const codeBlocks = [];
+
+            html = html.replace(
+                /```(?:[a-zA-Z0-9_+-]+)?\s*([\s\S]*?)```/g,
+                function(match, code) {
+                    const index = codeBlocks.length;
+                    codeBlocks.push(code.trim());
+                    return `___CODE_BLOCK_${index}___`;
+                }
+            );
+
+            /* Headings */
+            html = html.replace(
+                /^### (.*)$/gm,
+                "<h3>$1</h3>"
+            );
+
+            html = html.replace(
+                /^## (.*)$/gm,
+                "<h2>$1</h2>"
+            );
+
+            html = html.replace(
+                /^# (.*)$/gm,
+                "<h2>$1</h2>"
+            );
+
+            /* Bold */
+            html = html.replace(
+                /\*\*(.*?)\*\*/g,
+                "<strong>$1</strong>"
+            );
+
+            /* Italic */
+            html = html.replace(
+                /(?<!\*)\*([^*\n]+)\*(?!\*)/g,
+                "<em>$1</em>"
+            );
+
+            /* Inline code */
+            html = html.replace(
+                /`([^`\n]+)`/g,
+                "<code>$1</code>"
+            );
+
+            /* Horizontal lines */
+            html = html.replace(
+                /^\s*---+\s*$/gm,
+                "<hr>"
+            );
+
+            /* Numbered lists */
+            html = html.replace(
+                /(?:^|\n)((?:\d+\.\s+.*(?:\n|$))+)/g,
+                function(match, list) {
+
+                    const items = list
+                        .trim()
+                        .split(/\n/)
+                        .filter(Boolean)
+                        .map(item =>
+                            item.replace(/^\d+\.\s+/, "")
+                        )
+                        .map(item => `<li>${item}</li>`)
+                        .join("");
+
+                    return `<ol>${items}</ol>`;
+                }
+            );
+
+            /* Bullet lists */
+            html = html.replace(
+                /(?:^|\n)((?:[-*]\s+.*(?:\n|$))+)/g,
+                function(match, list) {
+
+                    const items = list
+                        .trim()
+                        .split(/\n/)
+                        .filter(Boolean)
+                        .map(item =>
+                            item.replace(/^[-*]\s+/, "")
+                        )
+                        .map(item => `<li>${item}</li>`)
+                        .join("");
+
+                    return `<ul>${items}</ul>`;
+                }
+            );
+
+            /* Paragraphs */
+            const parts = html.split(/\n{2,}/);
+
+            html = parts.map(part => {
+
+                part = part.trim();
+
+                if (!part) return "";
+
+                if (
+                    part.startsWith("<h2>") ||
+                    part.startsWith("<h3>") ||
+                    part.startsWith("<h4>") ||
+                    part.startsWith("<ul>") ||
+                    part.startsWith("<ol>") ||
+                    part.startsWith("<hr>") ||
+                    part.startsWith("___CODE_BLOCK_")
+                ) {
+                    return part;
+                }
+
+                return "<p>" + part.replace(/\n/g, "<br>") + "</p>";
+
+            }).join("\n");
+
+            /* Restore code blocks */
+            codeBlocks.forEach((code, index) => {
+
+                const safeCode = code
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;");
+
+                html = html.replace(
+                    `___CODE_BLOCK_${index}___`,
+                    `<pre><code>${safeCode}</code></pre>`
+                );
+
+            });
+
+            return html;
+        }
+
+
+        const answerBox = document.getElementById("answerContent");
+
+        const rawAnswer = answerBox.textContent;
+
+        answerBox.innerHTML = formatAnswer(rawAnswer);
+    </script>
+
+</body>
+</html>

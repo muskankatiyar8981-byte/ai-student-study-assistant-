@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Quiz Result - StudyNova</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Poppins", sans-serif;
+            background: #f3f3f3;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            width: 100%;
+            background: white;
+            padding: 18px 7%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 25px;
+            font-weight: 800;
+            color: #555;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: #8b7cf6;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .online {
+            font-size: 13px;
+            color: #555;
+            background: #f1f1f1;
+            padding: 8px 14px;
+            border-radius: 20px;
+        }
+
+        .online-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #6bcf63;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        /* MAIN */
+        .container {
+            width: 90%;
+            max-width: 950px;
+            margin: 45px auto;
+        }
+
+        .back-btn {
+            display: inline-block;
+            text-decoration: none;
+            color: #555;
+            background: white;
+            padding: 11px 18px;
+            border-radius: 12px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            transition: 0.2s;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            background: #eeeeee;
+        }
+
+        /* RESULT CARD */
+        .result-card {
+            background: white;
+            border-radius: 25px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.07);
+            margin-bottom: 30px;
+        }
+
+        .result-icon {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 18px;
+            background: #eeeeee;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 42px;
+        }
+
+        .result-card h1 {
+            font-size: 32px;
+            color: #444;
+            margin-bottom: 8px;
+        }
+
+        .result-card p {
+            color: #777;
+            font-size: 15px;
+        }
+
+        /* SCORE */
+        .score-box {
+            margin: 28px auto;
+            max-width: 500px;
+            background: #f4f4f4;
+            border-radius: 20px;
+            padding: 25px;
+        }
+
+        .score {
+            font-size: 50px;
+            font-weight: 800;
+            color: #7b6ee8;
+        }
+
+        .percentage {
+            font-size: 20px;
+            font-weight: 600;
+            color: #555;
+            margin-top: 5px;
+        }
+
+        .message {
+            margin-top: 15px;
+            font-size: 15px;
+            color: #666;
+        }
+
+        /* REVIEW */
+        .review-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #444;
+            margin-bottom: 18px;
+        }
+
+        .answer-card {
+            background: white;
+            border-radius: 18px;
+            padding: 22px;
+            margin-bottom: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            text-align: left;
+        }
+
+        .question-number {
+            font-size: 13px;
+            font-weight: 700;
+            color: #8b7cf6;
+            margin-bottom: 8px;
+        }
+
+        .question {
+            font-size: 16px;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .answer-row {
+            padding: 10px 14px;
+            border-radius: 10px;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+
+        .correct {
+            background: #e9f7e7;
+            color: #357a32;
+        }
+
+        .wrong {
+            background: #f9eaea;
+            color: #a33a3a;
+        }
+
+        .correct-answer {
+            margin-top: 10px;
+            padding: 10px 14px;
+            background: #eeeeee;
+            border-radius: 10px;
+            color: #555;
+            font-size: 14px;
+        }
+
+        /* BUTTON */
+        .bottom-buttons {
+            text-align: center;
+            margin-top: 30px;
+            margin-bottom: 50px;
+        }
+
+        .home-btn {
+            display: inline-block;
+            text-decoration: none;
+            background: #777;
+            color: white;
+            padding: 13px 25px;
+            border-radius: 13px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .home-btn:hover {
+            background: #555;
+            transform: translateY(-2px);
+        }
+
+        /* MOBILE */
+        @media (max-width: 600px) {
+
+            .navbar {
+                padding: 15px 5%;
+            }
+
+            .logo {
+                font-size: 21px;
+            }
+
+            .online {
+                display: none;
+            }
+
+            .container {
+                width: 92%;
+                margin-top: 30px;
+            }
+
+            .result-card {
+                padding: 30px 20px;
+            }
+
+            .result-card h1 {
+                font-size: 26px;
+            }
+
+            .score {
+                font-size: 42px;
+            }
+
+            .answer-card {
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+
+        <a href="/" class="logo">
+            Study<span>Nova</span>
+        </a>
+
+        <div class="nav-right">
+            <div class="online">
+                <span class="online-dot"></span>
+                AI Online
+            </div>
+        </div>
+
+    </nav>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="container">
+
+        <a href="/" class="back-btn">
+            ← Back to StudyNova
+        </a>
+
+
+        <!-- RESULT -->
+        <section class="result-card">
+
+            <div class="result-icon">
+                🏆
+            </div>
+
+            <h1>Quiz Completed!</h1>
+
+            <p>Here is your quiz performance.</p>
+
+
+            <div class="score-box">
+
+                <div class="score">
+                    {{ score }} / {{ total }}
+                </div>
+
+                <div class="percentage">
+                    {{ percentage }}%
+                </div>
+
+                <div class="message">
+
+                    {% if percentage >= 80 %}
+                        Excellent work! 🎉 Keep it up!
+                    {% elif percentage >= 60 %}
+                        Good job! 👍 Keep practicing.
+                    {% elif percentage >= 40 %}
+                        Nice attempt! 📚 A little more practice will help.
+                    {% else %}
+                        Keep learning and try again! 💪
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ANSWER REVIEW -->
+        <h2 class="review-title">
+            Answer Review
+        </h2>
+
+
+        {% for item in results %}
+
+        <div class="answer-card">
+
+            <div class="question-number">
+                Question {{ loop.index }}
+            </div>
+
+            <div class="question">
+                {{ item.question }}
+            </div>
+
+
+            {% if item.is_correct %}
+
+                <div class="answer-row correct">
+                    ✓ Your Answer: {{ item.user_answer }}
+                </div>
+
+            {% else %}
+
+                <div class="answer-row wrong">
+                    ✗ Your Answer: {{ item.user_answer }}
+                </div>
+
+                <div class="correct-answer">
+                    ✓ Correct Answer: {{ item.correct_answer }}
+                </div>
+
+            {% endif %}
+
+        </div>
+
+        {% endfor %}
+
+
+        <!-- BOTTOM BUTTON -->
+        <div class="bottom-buttons">
+
+            <a href="/" class="home-btn">
+                ← Back to StudyNova
+            </a>
+
+        </div>
+
+    </main>
+
+</body>
+</html>
